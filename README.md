@@ -45,10 +45,10 @@ Follow these instructions to generate your own quantum-safe wallet.
 
 ### Generate Your Wallet
 
-Run the `qti2.js` script from the root directory to generate your wallet.
+Run the `qtc.js` script from the root directory to generate your wallet.
 
 ```bash
-node qti2.js
+node qtc.js
 ```
 
 The script will output the wallet details to your console and save them to a file named `qti2_wallet.json`.
