@@ -55,7 +55,7 @@ The script will output the wallet details to your console and save them to a fil
 
 ## Wallet Output
 
-The generated `qti2_wallet.json` file contains your address and keys.
+The generated `qtc_wallet.json` file contains your address and keys.
 
 ```json
 {
