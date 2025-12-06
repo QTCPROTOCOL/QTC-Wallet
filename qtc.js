@@ -84,8 +84,8 @@ async function generateWallet() {
 
   // --- 6. Save to file and print
   try {
-    fs.writeFileSync("qti2_wallet.json", JSON.stringify(wallet, null, 2));
-    console.error("\n[SUCCESS] Wallet generated and saved to 'qti2_wallet.json'");
+    fs.writeFileSync("qtc_wallet.json", JSON.stringify(wallet, null, 2));
+    console.error("\n[SUCCESS] Wallet generated and saved to 'qtc_wallet.json'");
     // ONLY print the JSON to stdout
     console.log(JSON.stringify(wallet, null, 2));
   } catch (err) {
