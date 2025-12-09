@@ -38,7 +38,7 @@ Creates: `qti3_pqhd_wallet.json`
 
 ### Generate Multi-Address PQ-HD HD Wallet (Method 2)
 ```bash
-# Generate 10 PQ-HD addresses (default behavior)
+# Generate 5 PQ-HD addresses (default behavior)
 node qti3_hd.js
 
 # Generate 10 addresses for account 0, change 0 (explicit)
@@ -51,7 +51,7 @@ node qti3_hd.js 5 1 1
 node qti3_hd.js 20 0 0
 ```
 
-**Default Behavior**: qti3_hd.js generates 10 addresses for account 0, change 0
+**Default Behavior**: qti3_hd.js generates 5 addresses for account 0, change 0
 
 ### Custom Address Generation
 ```bash
@@ -86,11 +86,6 @@ Both methods provide quantum-safe security using:
 - ✅ **Dilithium3**: NIST-selected quantum-safe digital signatures  
 - ✅ **SHA3-512/256**: Quantum-resistant hash functions
 - ✅ **bech32m Encoding**: Error-correcting address format
-
-### ⚠️ **Classical RNG Vulnerability**
-- **Current Issue**: `crypto.randomBytes()` is NOT quantum-safe
-- **Risk Level**: MEDIUM (quantum computers don't exist yet)
-- **Mitigation**: Multiple entropy sources, user input, future quantum RNG
 
 ### 🔧 **HD Wallet Security (✅)**
 - **Hierarchical Derivation**: SHA3-512(master_entropy || path || index)
@@ -140,7 +135,7 @@ node qti3.js
 
 ### Multi-Address HD Wallet Generation
 ```bash
-# Generate 10 PQ-HD addresses (default)
+# Generate 5 PQ-HD addresses (default)
 node qti3_hd.js
 
 # Generate 10 addresses for account 0, change 0 (explicit)
