@@ -5,10 +5,11 @@ This directory contains JavaScript implementations of QTC's quantum-safe wallet 
 ## Files
 
 ### Core Implementations
-- **`qti2.js`** - Primary Wallet Method (QTC Core Method 1)
-- **`qti3.js`** - Single PQ-HD Wallet Method (QTC Core Method 2)
-- **`qti3_hd.js`** - Multi-Address PQ-HD HD Wallet (QTC Core Method 2)
-- **`compare_wallets.js`** - Comparison script between both methods
+- **`qti2.js`** - Primary Wallet Method (QTC Core Option 1)
+- **`qti3.js`** - Single PQ-HD Wallet Method (QTC Core Option 2)
+- **`qti3_hd.js`** - Multi-Address PQ-HD HD Wallet (QTC Core Option 2)
+- **`qti4.js`** - Quantum Mnemonic Wallet (QTC Core Option 3) - *In parent directory*
+- **`compare_wallets.js`** - Comparison script between methods
 
 ### Dependencies
 - **`noble-post-quantum JS/`** - Production-grade post-quantum cryptography library
@@ -16,7 +17,7 @@ This directory contains JavaScript implementations of QTC's quantum-safe wallet 
 
 ## Usage
 
-### Generate Primary Wallet (Method 1)
+### Generate Primary Wallet (Option 1)
 ```bash
 node qti2.js
 ```
@@ -24,21 +25,21 @@ Creates: `qti2_wallet.json`
 - Witness version: 1
 - Dilithium keys: Deterministic from Kyber shared secret
 - Address: SHA3-256(Dilithium Public Key)
-- Purpose: Direct QTC native wallets
+- Purpose: Primary QTC address generation method
 
-### Generate Single PQ-HD Wallet (Method 2)
+### Generate Single PQ-HD Wallet (Option 2)
 ```bash
 node qti3.js
 ```
 Creates: `qti3_pqhd_wallet.json`
 - Witness version: 2
-- Dilithium keys: Random generation
+- Dilithium keys: **Deterministic** from Kyber shared secret
 - Address: SHA3-256(Master Entropy)
 - Purpose: External wallet integration
 
-### Generate Multi-Address PQ-HD HD Wallet (Method 2)
+### Generate Multi-Address PQ-HD HD Wallet (Option 2)
 ```bash
-# Generate 5 PQ-HD addresses (default behavior)
+# Generate 10 PQ-HD addresses (default behavior)
 node qti3_hd.js
 
 # Generate 10 addresses for account 0, change 0 (explicit)
@@ -51,7 +52,27 @@ node qti3_hd.js 5 1 1
 node qti3_hd.js 20 0 0
 ```
 
-**Default Behavior**: qti3_hd.js generates 5 addresses for account 0, change 0
+**Default Behavior**: qti3_hd.js generates 10 addresses for account 0, change 0
+
+### Generate Quantum Mnemonic Wallet (Option 3)
+```bash
+# Generate 24-word mnemonic wallet (maximum security - default)
+node ../qti4.js MAXIMUM
+
+# Generate 12-word mnemonic wallet (standard security)
+node ../qti4.js STANDARD
+
+# Generate 18-word mnemonic wallet (high security)
+node ../qti4.js HIGH
+
+# Generate 36-word mnemonic wallet (ultra security)
+node ../qti4.js ULTRA
+```
+Creates: `qti4_quantum_mnemonic_wallet.json`
+- Witness version: 3
+- Dilithium keys: Deterministic from mnemonic-derived seed
+- Address: SHA3-256(MasterSeed + SharedSecret + DilithiumPK)
+- Purpose: Mnemonic phrase backup and recovery
 
 ### Custom Address Generation
 ```bash
@@ -70,14 +91,14 @@ Shows detailed comparison between Primary and PQ-HD methods.
 
 ## Key Differences
 
-| Feature | Primary (qti2.js) | PQ-HD (qti3.js) |
-|---------|-------------------|-------------------|
-| Method | QTC Core Method 1 | QTC Core Method 2 |
-| Witness Version | 1 | 2 |
-| Dilithium Keys | Deterministic | Random |
-| Entropy Source | Kyber Shared Secret | Combined Input |
-| Address Generation | SHA3-256(Dilithium) | SHA3-256(Master) |
-| Purpose | Direct QTC Use | External Wallets |
+| Feature | Primary (qti2.js) | PQ-HD (qti3.js) | Mnemonic (qti4.js) |
+|---------|-------------------|------------------|-------------------|
+| Method | QTC Core Option 1 | QTC Core Option 2 | QTC Core Option 3 |
+| Witness Version | 1 | 2 | 3 |
+| Dilithium Keys | Deterministic | **Deterministic** | Deterministic |
+| Entropy Source | Kyber Shared Secret | Combined Input | Mnemonic + Combined |
+| Address Generation | SHA3-256(Dilithium) | SHA3-256(Master) | SHA3-256(Combined) |
+| Purpose | Primary Method | External Wallets | Mnemonic Backup |
 
 ## Security
 
@@ -87,6 +108,12 @@ Both methods provide quantum-safe security using:
 - ✅ **SHA3-512/256**: Quantum-resistant hash functions
 - ✅ **bech32m Encoding**: Error-correcting address format
 
+### ✅ **Deterministic Key Generation (FIXED)**
+- **All Options**: Now use deterministic key generation
+- **Option 1**: Dilithium derived from Kyber shared secret
+- **Option 2**: Dilithium derived from Kyber shared secret (FIXED)
+- **Option 3**: Dilithium derived from mnemonic seed
+
 ### 🔧 **HD Wallet Security (✅)**
 - **Hierarchical Derivation**: SHA3-512(master_entropy || path || index)
 - **Deterministic**: Same master → same addresses
@@ -94,11 +121,12 @@ Both methods provide quantum-safe security using:
 
 ## Compatibility
 
-Both wallet types are fully compatible with QTC network:
+All three wallet types are fully compatible with QTC network:
 - Addresses use bech32m encoding with "qtc" prefix
-- Witness versions (1 and 2) distinguish wallet types
+- Witness versions (1, 2, and 3) distinguish wallet types
 - All transactions are quantum-safe
-- Both support Kyber1024 KEM for encrypted communications
+- All support Kyber1024 KEM for encrypted communications
+- All use deterministic key generation for reproducibility
 
 ## Integration
 
@@ -135,7 +163,7 @@ node qti3.js
 
 ### Multi-Address HD Wallet Generation
 ```bash
-# Generate 5 PQ-HD addresses (default)
+# Generate 10 PQ-HD addresses (default)
 node qti3_hd.js
 
 # Generate 10 addresses for account 0, change 0 (explicit)

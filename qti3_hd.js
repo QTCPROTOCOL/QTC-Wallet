@@ -139,13 +139,16 @@ class QTCPQHDWallet {
     
     console.error("[✓] Kyber KEM completed, shared secret established.");
 
-    // Step 2: Generate random Dilithium3 keypair for master entropy
+    // Step 2: Generate deterministic Dilithium3 keypair from Kyber shared secret
     const { ml_dsa65 } = await import("./noble-post-quantum JS/src/ml-dsa.js");
-    const dilithium_seed = crypto.randomBytes(32);
+    const dilithium_seed = crypto.createHash("sha3-256")
+      .update(this.sharedSecret)
+      .update("QTC_PQHD_DILITHIUM")
+      .digest();
     const dilithiumKeyPair = ml_dsa65.keygen(dilithium_seed);
     const dilithiumPublicKey = dilithiumKeyPair.publicKey;
 
-    console.error("[✓] Dilithium3 random keypair generated.");
+    console.error("[✓] Dilithium3 deterministic keypair generated.");
 
     // Step 3: Derive master entropy using SHA3-512(KyberSharedSecret || DilithiumPublicKey)
     const combinedInput = Buffer.concat([this.sharedSecret, Buffer.from(dilithiumPublicKey)]);
@@ -208,7 +211,7 @@ class QTCPQHDWallet {
     return {
       wallet_type: "QTC-PQHD-HD",
       version: "QTC-PQHD-2.0",
-      algorithm: "Kyber1024-KEM + Dilithium3-DSA (PQ-HD HD)",
+      algorithm: "Kyber1024-KEM + Dilithium3-DSA (Deterministic PQ-HD HD)",
       quantum_safe: true,
       witness_version: 2,
       

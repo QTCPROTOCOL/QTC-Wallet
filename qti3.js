@@ -40,15 +40,18 @@ async function generatePQHDWallet() {
     process.exit(1);
   }
 
-  // --- 2. Generate Dilithium3 Keypair (Random, not derived - PQ-HD Method)
+  // --- 2. Generate Dilithium3 Keypair (Deterministic from Kyber shared secret)
   let dilithium_pk, dilithium_sk;
   try {
-    // Generate random seed for Dilithium (PQ-HD method uses random, not derived)
-    const dilithium_seed = crypto.randomBytes(32);
+    // Generate deterministic seed for Dilithium from Kyber shared secret
+    const dilithium_seed = crypto.createHash("sha3-256")
+      .update(sharedSecret)
+      .update("QTC_PQHD_DILITHIUM")
+      .digest();
     const dilithiumKeyPair = ml_dsa65.keygen(dilithium_seed);
     dilithium_pk = dilithiumKeyPair.publicKey;
     dilithium_sk = dilithiumKeyPair.secretKey;
-    console.error("[✓] Dilithium3 random keypair generated (PQ-HD method).");
+    console.error("[✓] Dilithium3 deterministic keypair generated (PQ-HD method).");
   } catch (err) {
     console.error("[ERROR] Dilithium key generation failed:", err);
     process.exit(1);
@@ -88,7 +91,7 @@ async function generatePQHDWallet() {
     dilithium_private_b64: Buffer.from(dilithium_sk).toString("base64"),
     kyber_shared_secret_b64: sharedSecret.toString("base64"),
     combined_input_b64: combined_input.toString("base64"),
-    algorithm: "Kyber1024-KEM + Dilithium3-DSA (PQ-HD)",
+    algorithm: "Kyber1024-KEM + Dilithium3-DSA (Deterministic PQ-HD)",
     quantum_safe: true,
     version: "QTC-PQHD-1.0",
     description: "QTC PQ-HD Wallet for External Wallet Integration"
