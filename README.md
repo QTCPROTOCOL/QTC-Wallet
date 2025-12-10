@@ -1,4 +1,4 @@
-# QTC Quantum-Safe Wallet Generation (Q4)
+# QTC Quantum-Safe Wallet Generation
 
 This directory contains JavaScript implementations of QTC's quantum-safe wallet generation methods using Kyber1024 KEM and Dilithium3 signatures.
 
