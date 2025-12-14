@@ -7,7 +7,6 @@ This directory contains JavaScript implementations of QTC's quantum-safe wallet 
 ### Core Implementations
 - **`qti2.js`** - Primary Wallet Method (QTC Core Method 1)
 - **`qti3.js`** - PQ-HD Wallet Method (QTC Core Method 2)
-- **`qti4.js`** - Quantum Mnemonic Wallet Method (QTC Core Method 3)
 - **`compare_wallets.js`** - Comparison script between methods
 
 ### Dependencies
@@ -36,24 +35,6 @@ Creates: `qti3_pqhd_wallet.json`
 - Address: SHA3-256(Master Entropy)
 - Purpose: External wallet integration
 
-### Generate Quantum Mnemonic Wallet (Method 3)
-```bash
-node qti4.js
-```
-Creates: `qti4_quantum_mnemonic_wallet_[timestamp].json`
-- Witness version: 3
-- Mnemonic: BIP39 Standard (2048 words)
-- Security Levels: 12, 15, 18, 21, 24, or 36 words
-- Dilithium keys: Deterministic from Mnemonic Seed
-- Address: SHA3-256(Master Entropy)
-- Purpose: User-friendly, backup-focused wallet
-
-To specify a security level (default is MAXIMUM/24 words):
-```javascript
-// Edit qti4.js to change default or implement CLI arg parsing
-generateQuantumMnemonicWallet('ULTRA'); // Generates 36-word mnemonic
-```
-
 ### Compare Methods
 ```bash
 node compare_wallets.js
@@ -62,13 +43,13 @@ Shows detailed comparison between wallet generation methods.
 
 ## Key Differences
 
-| Feature | Primary (qti2.js) | PQ-HD (qti3.js) | Mnemonic (qti4.js) |
+| Feature | Primary (qti2.js) | PQ-HD (qti3.js) | 
 |---------|-------------------|-------------------|---------------------|
-| Witness Version | 1 | 2 | 3 |
-| Dilithium Keys | Deterministic | Deterministic (from SS) | Deterministic (Seed) |
-| Entropy Source | Kyber Shared Secret | Combined Input | BIP39 Mnemonic |
-| Address Generation | SHA3-256(Dilithium) | SHA3-256(Master) | SHA3-256(Master) |
-| Use Case | Native QTC | External Wallets | User Backup / Paper |
+| Witness Version | 1 | 2 |
+| Dilithium Keys | Deterministic | Deterministic (from SS) |
+| Entropy Source | Kyber Shared Secret | Combined Input |
+| Address Generation | SHA3-256(Dilithium) | SHA3-256(Master) |
+| Use Case | Native QTC | External Wallets |
 
 ## Security
 
@@ -83,7 +64,7 @@ All methods provide quantum-safe security using:
 ### Primary Method Flow
 1. Generate Kyber1024 keypair
 2. Create shared secret via encapsulate/decapsulate
-3. Derive entropy: SHA3-512(shared_secret)
+3. Derive entropy: SHAKE256
 4. Generate deterministic Dilithium3 keys from entropy
 5. Generate address: SHA3-256(dilithium_public_key) → bech32m
 
@@ -93,20 +74,11 @@ All methods provide quantum-safe security using:
 3. Derive master entropy: SHA3-512(shared_secret || dilithium_public_key)
 4. Generate address: SHA3-256(master_entropy) → bech32m
 
-### Quantum Mnemonic Method Flow (Method 3)
-1. Generate BIP39 Mnemonic (12-36 words)
-2. Derive Master Seed (PBKDF2-SHA512)
-3. Generate Kyber1024 Keypair from Master Seed
-4. Derive Dilithium Seed: SHA3-256(Master Seed || Context)
-5. Generate Dilithium3 Keypair from Dilithium Seed
-6. Derive Master Entropy: SHA3-512(KyberPublic || DilithiumPublic)
-7. Generate Address: SHA3-256(Master Entropy) → bech32m (Witness v3)
-
 ## Compatibility
 
 All wallet types are fully compatible with QTC network:
 - Addresses use bech32m encoding with "qtc" prefix
-- Witness versions (1, 2, 3) distinguish wallet types
+- Witness versions (1, 2) distinguish wallet types
 - All transactions are quantum-safe
 - Support Kyber1024 KEM for encrypted communications
 
@@ -115,7 +87,6 @@ All wallet types are fully compatible with QTC network:
 ### For QTC Core Integration
 - **Method 1:** Use `qti2.js` for native wallet generation (matches `QtcPrimaryWallet`)
 - **Method 2:** Use `qti3.js` for external wallet compatibility (matches `QtcPQHDWallet`)
-- **Method 3:** Use `qti4.js` for mnemonic-based recovery (matches `QtcMnemonicWallet`)
 
 ## Dependencies Installation
 
