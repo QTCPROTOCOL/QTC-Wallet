@@ -5,7 +5,7 @@
  */
 
 import { bech32 } from "bech32";
-import { SHA3 } from "sha3";
+import { SHA3, SHAKE } from "sha3";
 
 // --- HD Path Implementation for QTC
 class QTCHDPath {
@@ -139,12 +139,12 @@ class QTCPQHDWallet {
     
     console.error("[✓] Kyber KEM completed, shared secret established.");
 
-    // Step 2: Generate deterministic Dilithium3 keypair from Kyber shared secret
+    // Step 2: Generate deterministic Dilithium3 keypair from Kyber shared secret using SHAKE256
     const { ml_dsa65 } = await import("./noble-post-quantum JS/src/ml-dsa.js");
-    const dilithium_seed = crypto.createHash("sha3-256")
-      .update(this.sharedSecret)
-      .update("QTC_PQHD_DILITHIUM")
-      .digest();
+    const shake256 = new SHAKE(256);
+    shake256.update(this.sharedSecret);
+    shake256.update(Buffer.from("QTC_PQHD_DILITHIUM", "utf8"));
+    const dilithium_seed = shake256.digest(32); // 32 bytes for Dilithium3
     const dilithiumKeyPair = ml_dsa65.keygen(dilithium_seed);
     const dilithiumPublicKey = dilithiumKeyPair.publicKey;
 
