@@ -1,108 +1,55 @@
-# QTC Quantum-Safe Wallet Generation
+# QTC CLI Documentation
 
-This directory contains JavaScript implementations of QTC's quantum-safe wallet generation methods using Kyber1024 KEM and Dilithium3 signatures.
+## Overview
+The QTC wallet scripts (`qti2.js`, `qti3.js`, `qti3_hd.js`) have been upgraded to eliminate the dependency on the pure JavaScript `noble-post-quantum` library. They now exclusively use the `liboqs` C library via a custom-built CLI tool (`oqs_wallet_cli`).
 
-## Files
+## Upgraded Scripts
 
-### Core Implementations
-- **`qti2.js`** - Primary Wallet Method (QTC Core Method 1)
-- **`qti3.js`** - PQ-HD Wallet Method (QTC Core Method 2)
-- **`compare_wallets.js`** - Comparison script between methods
+### 1. `qti2.js`
+- **Purpose:** Standard Quantum-Safe Wallet Generation (Kyber1024 + Dilithium3).
+- **Upgrade:** 
+    - Replaced `noble-post-quantum` with `oqs_wallet_cli` for key generation.
+    - Added `ensureCliBuilt()` to automatically compile `oqs_wallet_cli` if missing.
+    - Added support for Windows compilation via `build_cli_win.bat` (MSVC).
 
-### Dependencies
-- **`noble-post-quantum JS/`** - Production-grade post-quantum cryptography library
-- **`package.json`** - Node.js dependencies (bech32, sha3)
+### 2. `qti3.js`
+- **Purpose:** PQ-HD Wallet Generation (Deterministic generation with version 2 witness program).
+- **Upgrade:**
+    - Standardized `ensureCliBuilt()` logic to match `qti2.js`.
+    - Switched Dilithium generation to use `oqs_wallet_cli`.
+    - Updated logging to reflect the use of `liboqs`.
 
-## Usage
-
-### Generate Primary Wallet (Method 1)
-```bash
-node qti2.js
-```
-Creates: `qti2_wallet.json`
-- Witness version: 1
-- Dilithium keys: Deterministic from Kyber shared secret
-- Address: SHA3-256(Dilithium Public Key)
-- Purpose: Direct QTC native wallets
-
-### Generate PQ-HD Wallet (Method 2)
-```bash
-node qti3.js
-```
-Creates: `qti3_pqhd_wallet.json`
-- Witness version: 2
-- Dilithium keys: Random generation
-- Address: SHA3-256(Master Entropy)
-- Purpose: External wallet integration
-
-### Compare Methods
-```bash
-node compare_wallets.js
-```
-Shows detailed comparison between wallet generation methods.
-
-## Key Differences
-
-| Feature | Primary (qti2.js) | PQ-HD (qti3.js) | 
-|---------|-------------------|-------------------|---------------------|
-| Witness Version | 1 | 2 |
-| Dilithium Keys | Deterministic | Deterministic (from SS) |
-| Entropy Source | Kyber Shared Secret | Combined Input |
-| Address Generation | SHA3-256(Dilithium) | SHA3-256(Master) |
-| Use Case | Native QTC | External Wallets |
-
-## Security
-
-All methods provide quantum-safe security using:
-- **Kyber1024 KEM**: NIST-selected quantum-safe key encapsulation
-- **Dilithium3**: NIST-selected quantum-safe digital signatures
-- **SHA3-512/256**: Quantum-resistant hash functions
-- **bech32m**: Error-correcting address encoding
+### 3. `qti3_hd.js`
+- **Purpose:** Hierarchical Deterministic (HD) Quantum Wallet Generation.
+- **Upgrade:**
+    - Removed all imports of `noble-post-quantum JS`.
+    - Implemented `ensureCliBuilt()` for reliable CLI access on all platforms.
+    - Updated `generateMaster()` to use `oqs_wallet_cli` for the master Dilithium key.
+    - Updated `QTCHDNode.generateKeyPair()` to use `oqs_wallet_cli` for derived keys.
 
 ## Technical Details
 
-### Primary Method Flow
-1. Generate Kyber1024 keypair
-2. Create shared secret via encapsulate/decapsulate
-3. Derive entropy: SHAKE256
-4. Generate deterministic Dilithium3 keys from entropy
-5. Generate address: SHA3-256(dilithium_public_key) → bech32m
+### `oqs_wallet_cli`
+This is a small C++ wrapper around `liboqs` that provides deterministic key generation for:
+- **ML-KEM-1024 (Kyber1024)**: `kem_self_from_seed`
+- **ML-DSA-65 (Dilithium3)**: `gen_dilithium_from_seed`
 
-### PQ-HD Method Flow
-1. Generate Kyber1024 keypair
-2. Derive deterministic Dilithium3 keypair from Kyber shared secret
-3. Derive master entropy: SHA3-512(shared_secret || dilithium_public_key)
-4. Generate address: SHA3-256(master_entropy) → bech32m
+The CLI is built automatically when running any of the `qti*.js` scripts.
 
-## Compatibility
+### Windows Support
+- **Compiler:** Uses `cl.exe` (Visual Studio MSVC).
+- **Script:** `build_cli_win.bat` sets up the environment (vcvars64) and compiles the CLI.
+- **Libraries:** Links against `oqs.lib` and `Advapi32.lib`.
 
-All wallet types are fully compatible with QTC network:
-- Addresses use bech32m encoding with "qtc" prefix
-- Witness versions (1, 2) distinguish wallet types
-- All transactions are quantum-safe
-- Support Kyber1024 KEM for encrypted communications
+### Linux/macOS Support
+- **Compiler:** Uses `g++` or `clang++`.
+- **Script:** Uses the existing `Makefile`.
 
-## Integration
-
-### For QTC Core Integration
-- **Method 1:** Use `qti2.js` for native wallet generation (matches `QtcPrimaryWallet`)
-- **Method 2:** Use `qti3.js` for external wallet compatibility (matches `QtcPQHDWallet`)
-
-## Dependencies Installation
-
+## Usage
+Run the scripts as normal:
 ```bash
-npm install
+node qti2.js
+node qti3.js
+node qti3_hd.js
 ```
-
-## Requirements
-
-- Node.js 16+ with ES modules support
-- 64-bit system for optimal performance
-- Secure random number generator (CSPRNG)
-
-## Notes
-
-- Implementations are production-ready and match QTC Core C++ designs
-- Private keys are stored in base64 format for easy integration
-- Shared secrets are included for debugging and verification
-- All cryptographic operations use constant-time implementations
+The scripts will handle the compilation and execution automatically.
